@@ -19,7 +19,7 @@ Serien-E-Mails per SMTP versenden – mit PyQt5-GUI, individuellen Anhängen pro
 - PyQt5
 
 ```bash
-python -m pip install PyQt5
+python -m pip install -r requirements.txt
 ```
 
 ## Starten (ohne Kompilieren)

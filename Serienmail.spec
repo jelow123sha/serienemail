@@ -23,7 +23,8 @@ a = Analysis(
         'email.mime.text',
         'email.mime.base',
         'email.encoders',
-        'mimetypes'
+        'mimetypes',
+        'openpyxl'
     ],
     hookspath=[],
     runtime_hooks=[],
