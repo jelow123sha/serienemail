@@ -17,6 +17,7 @@ from PyQt5.QtCore import Qt
 
 SETTINGS_FILE = "einstellungen.json"
 RECIPIENTS_FILE = "empfaenger.json"
+DRAFT_FILE = "entwurf.json"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -91,12 +92,32 @@ class MainWindow(QMainWindow):
         self.email_body.setAcceptRichText(False)
         content_layout.addWidget(self.email_body)
 
+        draft_button_layout = QHBoxLayout()
+        save_draft_btn = QPushButton("Text als Entwurf speichern...")
+        save_draft_btn.clicked.connect(self.save_draft_as)
+        draft_button_layout.addWidget(save_draft_btn)
+
+        load_draft_btn = QPushButton("Entwurf laden...")
+        load_draft_btn.clicked.connect(self.load_draft_from)
+        draft_button_layout.addWidget(load_draft_btn)
+
+        content_layout.addLayout(draft_button_layout)
+
         self.layout.addWidget(content_group)
 
     def create_recipient_table(self):
         self.recipient_table = QTableWidget(0, 6)
         self.recipient_table.setHorizontalHeaderLabels(["", "Name", "Anrede", "E-Mail", "Anhang-Pfad(e)", ""])
-        self.recipient_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # Spalten manuell per Ziehen der Trennlinie anpassbar; zusätzliche
+        # Fensterbreite geht ausschließlich an "Anhang-Pfad(e)" (Stretch)
+        header = self.recipient_table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        header.setSectionResizeMode(4, QHeaderView.Stretch)
+        self.recipient_table.setColumnWidth(0, 30)
+        self.recipient_table.setColumnWidth(1, 150)
+        self.recipient_table.setColumnWidth(2, 90)
+        self.recipient_table.setColumnWidth(3, 220)
+        self.recipient_table.setColumnWidth(5, 160)
         self.recipient_table.setEditTriggers(
             QTableWidget.DoubleClicked | QTableWidget.EditKeyPressed | QTableWidget.AnyKeyPressed
         )
@@ -244,6 +265,39 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "Erfolg", f"Einstellungen wurden aus\n{path}\ngeladen.")
             except Exception as e:
                 QMessageBox.warning(self, "Fehler", f"Fehler beim Laden:\n{str(e)}")
+
+    def save_draft_as(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Entwurf speichern", DRAFT_FILE, "JSON-Dateien (*.json)"
+        )
+        if path:
+            self._save_draft_to_path(path)
+            QMessageBox.information(self, "Erfolg", f"Entwurf wurde nach\n{path}\ngespeichert.")
+
+    def _save_draft_to_path(self, path):
+        draft = {
+            "subject": self.email_subject.text(),
+            "body": self.email_body.toPlainText()
+        }
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(draft, f, indent=2, ensure_ascii=False)
+
+    def load_draft_from(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Entwurf laden", DRAFT_FILE, "JSON-Dateien (*.json)"
+        )
+        if path:
+            try:
+                self._load_draft_from_path(path)
+                QMessageBox.information(self, "Erfolg", f"Entwurf wurde aus\n{path}\ngeladen.")
+            except Exception as e:
+                QMessageBox.warning(self, "Fehler", f"Fehler beim Laden:\n{str(e)}")
+
+    def _load_draft_from_path(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            draft = json.load(f)
+        self.email_subject.setText(draft.get("subject", ""))
+        self.email_body.setPlainText(draft.get("body", ""))
 
     def save_recipients(self):
         self._save_recipients_to_path(RECIPIENTS_FILE)

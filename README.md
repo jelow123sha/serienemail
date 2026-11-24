@@ -10,6 +10,8 @@ Serien-E-Mails per SMTP versenden – mit PyQt5-GUI, individuellen Anhängen pro
 - Optionale Kopie (BCC) an den Absender
 - Einstellungen (`einstellungen.json`) und Empfängerlisten (`empfaenger.json`) speichern/laden
 - Korrekte MIME-Typen für Anhänge und RFC-2231-kodierte Dateinamen (umlautsicher)
+- Spaltenbreiten der Empfängertabelle manuell anpassbar; beim Fenstervergrößern wächst nur die Spalte „Anhang-Pfad(e)"
+- E-Mail-Text und Betreff als Entwurf speichern und wieder laden (`entwurf.json`, Speicherort frei wählbar)
 
 ## Voraussetzungen
 
